@@ -1,22 +1,30 @@
+using Application.Interfaces;
 using Domain.DTO;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WeatherAPI.Controllers
 {
-    public class WeatherForecastController : BaseController
+    public class WeatherForecastController : BaseController<WeatherForecastController>
     {
-        public WeatherForecastController(ILogger<WeatherForecastController> logger) : base(logger) { }
+        private readonly IWeatherService _weatherService;
+
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, IWeatherService weatherService) : base(logger)
+        {
+            _weatherService = weatherService;
+        }
 
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] AddressDTO addressDTO)
+        public async Task<ActionResult<ResponseDTO<WeatherForecastDTO>>> Get([FromQuery] AddressDTO addressDTO)
         {
             try
             {
-                return new OkObjectResult(await new WeatherService(addressDTO));
+                var result = await _weatherService.Get7DaysForecast(addressDTO);
+                return new ObjectResult(result) { StatusCode = result.StatusCode };
             }
             catch (Exception ex)
             {
-                return RespondToException(ex);
+                var exceptionResponse = RespondToException<WeatherForecastDTO>(ex);
+                return new ObjectResult(exceptionResponse) { StatusCode = exceptionResponse.StatusCode };
             }
         }
     }

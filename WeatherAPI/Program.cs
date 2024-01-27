@@ -1,3 +1,5 @@
+using Application;
+using Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +13,9 @@ builder.Services.AddApiVersioning(options =>
 });
 
 builder.Services.AddControllers();
+
+// DI
+builder.Services.AddApplication().AddInfrastructure();
 
 var app = builder.Build();
 
