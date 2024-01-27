@@ -1,7 +1,6 @@
 ﻿using Common.Utilities;
 using Domain.DTO;
 using FluentValidation;
-using FluentValidation.Validators;
 
 namespace Application.Validation;
 
@@ -40,9 +39,8 @@ public class PeriodDTOValidator : AbstractValidator<PeriodDTO>
             .Must(date => date.Date >= DateTime.Today)
                 .WithMessage("The end time must be today or in the future.");
 
-        RuleFor(period => period.IsDayTime)
-            .NotNull()
-            .NotEmpty();
+        RuleFor(period => period.IsDaytime)
+            .NotNull();
 
         RuleFor(period => period.Temperature)
             .NotNull()
@@ -57,6 +55,24 @@ public class PeriodDTOValidator : AbstractValidator<PeriodDTO>
         RuleFor(period => period.RelativeHumidity)
             .SetValidator(new HumidityDTOValidator());
 
+        RuleFor(period => period.WindSpeed)
+            .NotNull()
+            .NotEmpty();
+
+        RuleFor(period => period.WindDirection)
+            .NotNull()
+            .NotEmpty()
+            .Must(direction => StringCollections.WindDirections.Contains(direction.ToUpper()))
+                .WithMessage($"The wind direction value has to match one of the following: " +
+                             $"{string.Join(" ,", StringCollections.WindDirections)}.");
+
+        RuleFor(period => period.ShortForecast)
+            .NotNull()
+            .NotEmpty();
+
+        RuleFor(period => period.DetailedForecast)
+            .NotNull()
+            .NotEmpty();
 
         RuleFor(period => period.Icon)
             .NotNull()
@@ -72,7 +88,8 @@ public class HumidityDTOValidator : AbstractValidator<HumidityDTO>
     {
         RuleFor(humidity => humidity.Value)
             .NotNull()
-            .NotEmpty();
-
+            .NotEmpty()
+            .Must(value => value >= 0 && value <= 100)
+                .WithMessage("The realtive humidity must be between 0% and 100%");
     }
 }

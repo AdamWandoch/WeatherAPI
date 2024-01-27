@@ -11,14 +11,17 @@ public class WeatherService : BaseService, IWeatherService
     private readonly IValidator<AddressDTO> _addressValidator;
     private readonly IValidator<CoordinatesDTO> _coordsValidator;
     private readonly IValidator<string> _urlValidator;
+    private readonly IValidator<WeatherForecastDTO> _weatherForecastValidator;
 
     public WeatherService(IValidator<AddressDTO> addressValidator,
                           IValidator<CoordinatesDTO> coordsValidator,
-                          IValidator<string> urlValidator)
+                          IValidator<string> urlValidator,
+                          IValidator<WeatherForecastDTO> weatherForecastValidator)
     {
         _addressValidator = addressValidator;
         _coordsValidator = coordsValidator;
         _urlValidator = urlValidator;
+        _weatherForecastValidator = weatherForecastValidator;
     }
 
     public async Task<ResponseDTO<WeatherForecastDTO>> Get7DaysForecast(AddressDTO addressDTO)
@@ -47,11 +50,13 @@ public class WeatherService : BaseService, IWeatherService
 
         // get forecast details
         var forecastDetails = await GetForecastDetails(forecastResultURL);
-        if (forecastDetails.Periods != null)
+        var forecastValidation = _weatherForecastValidator.Validate(forecastDetails);
+        if (!forecastValidation.IsValid)
         {
-
+            return FailedValidation(result, forecastValidation);
         }
 
+        result.Data = forecastDetails;
         return result;
     }
 
@@ -80,7 +85,11 @@ public class WeatherService : BaseService, IWeatherService
 
                 if (addressMatches is null) return new CoordinatesDTO();
 
-                return new CoordinatesDTO() { Longtitude = addressMatches[0].coordinates.x, Latitude = addressMatches[0].coordinates.y };
+                return new CoordinatesDTO()
+                {
+                    Longtitude = addressMatches[0].coordinates.x,
+                    Latitude = addressMatches[0].coordinates.y
+                };
             }
             else
             {

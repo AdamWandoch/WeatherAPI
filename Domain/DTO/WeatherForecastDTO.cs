@@ -11,12 +11,12 @@ public class PeriodDTO
     public string? Name { get; set; }
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
-    public bool IsDayTime { get; set; }
+    public bool IsDaytime { get; set; }
     public short Temperature { get; set; }
     public char TemperatureUnit { get; set; }
     public HumidityDTO RelativeHumidity { get; set; } = new();
     public string? WindSpeed { get; set; }
-    public string? WindDirection { get; set; }
+    public string WindDirection { get; set; } = string.Empty;
     public string? Icon { get; set; }
     public string? ShortForecast { get; set; }
     public string? DetailedForecast { get; set; }
