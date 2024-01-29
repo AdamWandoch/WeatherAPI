@@ -2,7 +2,9 @@
 using Domain.DTO;
 using Domain.Exceptions;
 using FluentValidation;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Infrastructure.Services;
 
@@ -12,16 +14,19 @@ public class WeatherService : BaseService, IWeatherService
     private readonly IValidator<CoordinatesDTO> _coordsValidator;
     private readonly IValidator<string> _urlValidator;
     private readonly IValidator<WeatherForecastDTO> _weatherForecastValidator;
+    private readonly IConfiguration _configuration;
 
     public WeatherService(IValidator<AddressDTO> addressValidator,
                           IValidator<CoordinatesDTO> coordsValidator,
                           IValidator<string> urlValidator,
-                          IValidator<WeatherForecastDTO> weatherForecastValidator)
+                          IValidator<WeatherForecastDTO> weatherForecastValidator,
+                          IConfiguration configuration)
     {
         _addressValidator = addressValidator;
         _coordsValidator = coordsValidator;
         _urlValidator = urlValidator;
         _weatherForecastValidator = weatherForecastValidator;
+        _configuration = configuration;
     }
 
     public async Task<ResponseDTO<WeatherForecastDTO>> Get7DaysForecast(AddressDTO addressDTO)
@@ -48,7 +53,6 @@ public class WeatherService : BaseService, IWeatherService
             return FailedValidation(result, urlValidation);
         }
 
-        // get forecast details
         var forecastDetails = await GetForecastDetails(forecastResultURL);
         var forecastValidation = _weatherForecastValidator.Validate(forecastDetails);
         if (!forecastValidation.IsValid)
@@ -56,13 +60,13 @@ public class WeatherService : BaseService, IWeatherService
             return FailedValidation(result, forecastValidation);
         }
 
-        result.Data = forecastDetails;
+        result.ResponseData = forecastDetails;
         return result;
     }
 
-    private static async Task<CoordinatesDTO> GetCoordinates(AddressDTO addressDTO)
+    private async Task<CoordinatesDTO> GetCoordinates(AddressDTO addressDTO)
     {
-        using var httpClient = GetHttpClient("https://geocoding.geo.census.gov");
+        using var httpClient = GetHttpClient(_configuration["GeocodingApiURL"]);
 
         var queryParams = new Dictionary<string, string>
         {
@@ -84,6 +88,7 @@ public class WeatherService : BaseService, IWeatherService
                 var addressMatches = deserialized?.result.addressMatches;
 
                 if (addressMatches is null) return new CoordinatesDTO();
+                if (((JArray)addressMatches).Count == 0) return new CoordinatesDTO();
 
                 return new CoordinatesDTO()
                 {
@@ -102,9 +107,9 @@ public class WeatherService : BaseService, IWeatherService
         }
     }
 
-    private static async Task<string> GetForecastResultURL(CoordinatesDTO coordsDTO)
+    private async Task<string> GetForecastResultURL(CoordinatesDTO coordsDTO)
     {
-        using var httpClient = GetHttpClient("https://api.weather.gov");
+        using var httpClient = GetHttpClient(_configuration["NationalWeatherApi"]);
         httpClient.DefaultRequestHeaders.Accept.ParseAdd("application/ld+json");
 
         try
@@ -130,9 +135,9 @@ public class WeatherService : BaseService, IWeatherService
         }
     }
 
-    private static async Task<WeatherForecastDTO> GetForecastDetails(string forecastResultURL)
+    private async Task<WeatherForecastDTO> GetForecastDetails(string forecastResultURL)
     {
-        using var httpClient = GetHttpClient("https://api.weather.gov");
+        using var httpClient = GetHttpClient(_configuration["NationalWeatherApi"]);
         httpClient.DefaultRequestHeaders.Accept.ParseAdd("application/ld+json");
 
         try

@@ -32,8 +32,8 @@ public class PeriodDTOValidator : AbstractValidator<PeriodDTO>
             .NotEmpty();
 
         RuleFor(period => period.StartTime)
-            .Must(date => date.Date >= DateTime.Today)
-                .WithMessage("The start time must be today or in the future.");
+            .Must(date => date.Date >= DateTime.Today.AddDays(-1))
+                .WithMessage("The start time must be yesterday, today or in the future.");
 
         RuleFor(period => period.EndTime)
             .Must(date => date.Date >= DateTime.Today)
