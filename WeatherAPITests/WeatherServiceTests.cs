@@ -50,7 +50,7 @@ namespace WeatherAPITests
 
             #endregion
 
-            #region
+            #region Assert
 
             Assert.False(result.Errors.Count == 0);
 
