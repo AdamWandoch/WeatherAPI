@@ -19,6 +19,7 @@ public class AddressDTOValidator : AbstractValidator<AddressDTO>
             .NotEmpty();
 
         RuleFor(address => address.State)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .Length(2)
                 .WithMessage("State should consist of 2 letters only (state abbreviation). For example: AL for Alabama state.")

@@ -29,6 +29,11 @@ public class WeatherService : BaseService, IWeatherService
         _configuration = configuration;
     }
 
+    /// <summary>
+    /// Processes a forecast request
+    /// </summary>
+    /// <param name="addressDTO">Address for which the forecast was requested</param>
+    /// <returns>7 day weather forecast data</returns>
     public async Task<ResponseDTO<WeatherForecastDTO>> Get7DaysForecast(AddressDTO addressDTO)
     {
         var result = new ResponseDTO<WeatherForecastDTO>();

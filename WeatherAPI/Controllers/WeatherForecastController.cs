@@ -14,6 +14,11 @@ namespace WeatherAPI.Controllers
             _weatherService = weatherService;
         }
 
+        /// <summary>
+        /// Endpoint processes a forecast request using the forecast service
+        /// </summary>
+        /// <param name="addressDTO">Address for which the forecast was requested</param>
+        /// <returns>7 day weather forecast data</returns>
         [Authorize]
         [HttpGet]
         public async Task<ActionResult<ResponseDTO<WeatherForecastDTO>>> Get([FromQuery] AddressDTO addressDTO)

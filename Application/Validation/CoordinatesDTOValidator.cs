@@ -5,7 +5,7 @@ namespace Application.Validation;
 
 public class CoordinatesDTOValidator : AbstractValidator<CoordinatesDTO>
 {
-    private const string NotFound = "not found.";
+    private const string NotFound = "Address not found.";
 
     public CoordinatesDTOValidator()
     {
