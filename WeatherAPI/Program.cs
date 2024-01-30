@@ -39,15 +39,6 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Configure Kestrel to listen on HTTPS only
-//builder.WebHost.ConfigureKestrel(serverOptions =>
-//{
-//    serverOptions.ListenAnyIP(5001, listenOptions => // HTTPS port
-//    {
-//        listenOptions.UseHttps();
-//    });
-//});
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
