@@ -23,7 +23,7 @@ public class AddressDTOValidator : AbstractValidator<AddressDTO>
             .NotEmpty()
             .Length(2)
                 .WithMessage("State should consist of 2 letters only (state abbreviation). For example: AL for Alabama state.")
-            .Must(state => StringCollections.UsStates.Contains(state))
+            .Must(state => StringCollections.UsStates.Contains(state.ToUpper()))
                 .WithMessage("State abrreviation invalid.");
 
         RuleFor(address => address.ZipCode)
